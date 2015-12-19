@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Tuxedo Big File Uploads
- * Plugin URI:  http://wordpress.org/#
+ * Plugin URI:  https://github.com/andtrev/Tuxedo-Big-File-Uploads/
  * Description: Enables large file uploads in the built-in WordPress media uploader.
  * Version:     1.0
  * Author:      Trevor Anderson
- * Author URI:  http://goo.gl/us9i
+ * Author URI:  https://github.com/andtrev
  * License:     GPLv2 or later
  * Domain Path: /languages
  * Text Domain: tuxedo-big-file-uploads
