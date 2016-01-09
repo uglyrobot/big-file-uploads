@@ -28,10 +28,21 @@ if ( ! function_exists( 'mime_content_type' ) ) {
 	 */
 	function mime_content_type( $filename ) {
 
-		$finfo = finfo_open( FILEINFO_MIME );
-		$mimetype = finfo_file( $finfo, $filename );
-		finfo_close( $finfo );
-		return $mimetype;
+		if ( function_exists( 'finfo_open' ) ) {
+			$finfo = finfo_open( FILEINFO_MIME );
+			$mimetype = finfo_file( $finfo, $filename );
+			finfo_close( $finfo );
+			return $mimetype;
+		} else {
+			ob_start();
+			system( 'file -i -b ' . $filename );
+			$output = ob_get_clean();
+			$output = explode( '; ', $output );
+			if ( is_array( $output ) ) {
+				$output = $output[0];
+			}
+			return $output;
+		}
 
 	}
 }

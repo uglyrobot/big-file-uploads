@@ -1,10 +1,10 @@
 Tuxedo Big File Uploads
 =======================
-Contributors: andtrev  
-Tags: AJAX, file uploader, files, files uploader, ftp, image uploader, plugin, upload  
-Requires at least: 3.4  
-Tested up to: 4.4  
-License: GPLv2 or later  
+Contributors: andtrev
+Tags: AJAX, file uploader, files, files uploader, ftp, image uploader, plugin, upload
+Requires at least: 3.4
+Tested up to: 4.4.1
+License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Enables large file uploads in the built-in WordPress media uploader.
@@ -50,6 +50,9 @@ are uploaded and moved out of the temporary folder.
 
 Changelog
 ---------
+
+### 1.0.1
+* Added fallback if the file info extension is missing.
 
 ### 1.0
 * Initial release.
