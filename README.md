@@ -4,6 +4,7 @@ Contributors: andtrev
 Tags: AJAX, file uploader, files, files uploader, ftp, image uploader, plugin, upload  
 Requires at least: 3.4  
 Tested up to: 4.4.1  
+Version: 1.1  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +51,9 @@ are uploaded and moved out of the temporary folder.
 
 Changelog
 ---------
+
+### 1.1
+* Security fix: non-authenticated user could upload.
 
 ### 1.0.1
 * Added fallback if the file info extension is missing.

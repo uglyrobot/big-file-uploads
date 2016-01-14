@@ -17,6 +17,13 @@ if ( empty( $_FILES ) || $_FILES['async-upload']['error'] ) {
 	die();
 }
 
+/** Authenticate user. */
+require_once( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/wp-load.php' );
+
+if ( ! is_user_logged_in() || ! current_user_can( 'upload_files' ) ) {
+	die();
+}
+
 if ( ! function_exists( 'mime_content_type' ) ) {
 	/**
 	 * Return a file's mime type.
