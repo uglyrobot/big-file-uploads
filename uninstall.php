@@ -14,5 +14,6 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 /** Delete options. */
+delete_option( 'tuxbfu_max_upload_size' );
 delete_option( 'tuxbfu_chunk_size' );
 delete_option( 'tuxbfu_max_retries' );
