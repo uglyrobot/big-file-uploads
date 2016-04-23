@@ -1,5 +1,10 @@
 Tuxedo Big File Uploads
 =======================
+
+[![WordPress](https://img.shields.io/wordpress/plugin/dt/tuxedo-big-file-uploads.svg?maxAge=2592000)](https://wordpress.org/plugins/tuxedo-big-file-uploads/)
+[![WordPress](https://img.shields.io/wordpress/v/tuxedo-big-file-uploads.svg?maxAge=2592000)](https://wordpress.org/plugins/tuxedo-big-file-uploads/)
+[![WordPress rating](https://img.shields.io/wordpress/plugin/r/tuxedo-big-file-uploads.svg?maxAge=2592000)](https://wordpress.org/plugins/tuxedo-big-file-uploads/)
+
 Contributors: andtrev  
 Tags: AJAX, file uploader, files, files uploader, ftp, image uploader, plugin, upload  
 Requires at least: 3.4  
