@@ -36,6 +36,9 @@
  *
  * @since 1.0.0
  */
+
+defined('ABSPATH') or die('You can\'t access directly!');
+
 class TuxedoBigFileUploads {
 
 	/**
