@@ -268,7 +268,7 @@ p.lead {
 }
 
 .bfu-disabled {
-  opacity: 0.5;
+  display: none;
 }
 
 .dashicons-info {

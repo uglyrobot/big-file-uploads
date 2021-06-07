@@ -4,94 +4,80 @@
 		<div class="card-header h5">
 			<div class="d-flex align-items-center">
 				<h5 class="m-0 mr-auto p-0"><?php esc_html_e( 'Settings', 'tuxedo-big-file-uploads' ); ?></h5>
-
-				<small class="text-muted"><?php esc_html_e( 'Customize by user role', 'tuxedo-big-file-uploads' ); ?></small>
-				<div class="custom-control custom-switch ml-2">
-					<input type="checkbox" name="by_role" class="custom-control-input" id="customSwitch_role" value="1" <?php checked( $settings['by_role'] ); ?>>
-					<label class="custom-control-label" for="customSwitch_role"></label>
-				</div>
 			</div>
 		</div>
 		<div class="card-body p-md-5">
-			<div class="row justify-content-center mb-4" id="bfu-settings">
+			<div class="row justify-content-center mb-4">
 				<div class="col-md-6 col-sm-12">
 					<h5><?php esc_html_e( 'Maximum Upload Size', 'tuxedo-big-file-uploads' ); ?></h5>
-					<p class="lead"><?php printf( esc_html__( 'Big File Uploads allows you to bypass your hosting file size %s limit by seamlessly uploading in multiple smaller chunks. Set the max filesize you want to allow users to upload in Megabytes (MB) or Gigabytes (GB) up to what your hosting provider can handle.', 'tuxedo-big-file-uploads' ), size_format( $this->max_upload_size ) ); ?></p>
+					<p class="lead"><?php printf( esc_html__( 'Big File Uploads allows you to bypass your hosting file size %s limit by seamlessly uploading in multiple smaller chunks. Set the max filesize you want to allow users to upload in Megabytes (MB) or Gigabytes (GB) up to what your hosting provider can handle. Toggle "Customize by user role" to set the maximum file size for each users with upload capabilities.', 'tuxedo-big-file-uploads' ), size_format( $this->max_upload_size ) ); ?></p>
 					<p class="lead"><?php printf( esc_html__( 'Estimated maximum supported size: %s', 'tuxedo-big-file-uploads' ), $this->temp_available_size() ? size_format( $this->temp_available_size() ) : __( 'Unknown (set a reasonable default limit and adjust down if uploads fail)', 'tuxedo-big-file-uploads' ) ); ?>
 						<span class="dashicons dashicons-info text-muted" data-toggle="tooltip" title="<?php esc_attr_e( 'This is an estimate based on the available space in your server temp directory.', 'tuxedo-big-file-uploads' ); ?>"></span></p>
 				</div>
-				<div class="col-md-6 col-sm-12 text-right border p-4">
-					<div class="row justify-content-end">
-						<div class="pl-5 col-xl-6 col-lg-7 col-md-8 text-left"><strong><?php esc_html_e( 'All Users', 'tuxedo-big-file-uploads' ); ?></strong></div>
-					</div>
-					<div class="row mb-3 justify-content-end">
-						<div class="col-xl-6 col-lg-7 col-md-8">
-							<div class="input-group bfu-input-limit">
-								<input name="upload_limit" id="upload-limit" type="number" step="0.1" min="0" value="<?php echo esc_attr( $settings['limits']['all']['bytes'] ); ?>" class="form-control text-right"
-								       aria-label="<?php esc_attr_e( 'All users upload limit', 'tuxedo-big-file-uploads' ); ?>">
-								<div class="input-group-append">
-									<select name="upload_limit_format" id="upload-limit-format">
-										<option <?php selected( $settings['limits']['all']['format'], 'MB' ); ?> value="MB">MB</option>
-										<option <?php selected( $settings['limits']['all']['format'], 'GB' ); ?> value="GB">GB</option>
-									</select>
-								</div>
-							</div>
-							<div class="row text-center">
-								<div class="col">
-									<small><?php printf( esc_html__( 'Maximum Upload Size (default is %s)', 'tuxedo-big-file-uploads' ), size_format( $this->max_upload_size ) ); ?> <span class="dashicons dashicons-info text-muted" data-toggle="tooltip"
-									                                                                                                                                                       title="<?php esc_attr_e( 'Default size is defined by your hosting provider', 'tuxedo-big-file-uploads' ); ?>"></span></small>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="row justify-content-center mb-1 bfu-disabled" id="bfu-settings-roles">
-				<div class="col-md-6 col-sm-12">
-					<h5><?php esc_html_e( 'Max Upload Size by User Role', 'tuxedo-big-file-uploads' ); ?></h5>
-					<p class="lead"><?php esc_html_e( 'Set the maximum filesize each user role with upload capabilities.', 'tuxedo-big-file-uploads' ); ?></p>
-				</div>
-				<div class="col-md-6 col-sm-12 text-right border p-4">
-					<?php
-					foreach ( wp_roles()->roles as $role_key => $role ) {
-						if ( isset( $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'] ) {
-							?>
-							<div class="row justify-content-end">
-								<div class="pl-5 col-xl-6 col-lg-7 col-md-8 text-left"><strong><?php echo translate_user_role( $role['name'] ); ?></strong></div>
-							</div>
-							<div class="row mb-3 justify-content-end">
-								<div class="col-xl-6 col-lg-7 col-md-8">
-									<div class="input-group bfu-input-limit">
-										<input name="upload_limit[<?php echo esc_attr( $role_key ); ?>]" id="upload-limit-<?php echo esc_attr( $role_key ); ?>" type="number" step="0.1" min="0" value="<?php echo esc_attr( $settings['limits'][ $role_key ]['bytes'] ); ?>"
-										       class="form-control text-right" aria-label="<?php printf( esc_attr__( '%s upload limit', 'tuxedo-big-file-uploads' ), translate_user_role( $role['name'] ) ); ?>">
-										<div class="input-group-append">
-											<select name="upload_limit_format[<?php echo esc_attr( $role_key ); ?>]" id="upload-limit-format-<?php echo esc_attr( $role_key ); ?>">
-												<option <?php selected( $settings['limits'][ $role_key ]['format'], 'MB' ); ?> value="MB">MB</option>
-												<option <?php selected( $settings['limits'][ $role_key ]['format'], 'GB' ); ?> value="GB">GB</option>
-											</select>
-										</div>
-									</div>
-									<div class="row text-center">
-										<div class="col">
-											<small><?php printf( esc_html__( 'Maximum Upload Size (default is %s)', 'tuxedo-big-file-uploads' ), size_format( $this->max_upload_size ) ); ?> <span class="dashicons dashicons-info text-muted" data-toggle="tooltip"
-											                                                                                                                                                       title="<?php esc_attr_e( 'Default size is defined by your hosting provider', 'tuxedo-big-file-uploads' ); ?>"></span></small>
-										</div>
-									</div>
-								</div>
-							</div>
-						<?php }
-					} ?>
-				</div>
-			</div>
-			<div class="row justify-content-center mb-4" id="bfu-settings-roles">
-				<div class="col-md-6 col-sm-12">
-				</div>
 				<div class="col-md-6 col-sm-12 text-right p-4">
-					<div class="row justify-content-end mt-2">
-						<div class="col-xl-5 col-lg-6 col-md-7 text-center">
-							<button class="btn text-nowrap btn-info btn-lg btn-block" name="bfu_settings_submit" value="1" type="submit"><?php esc_html_e( 'Save', 'tuxedo-big-file-uploads' ); ?></button>
+					<div class="custom-control custom-switch mb-3">
+						<input type="checkbox" name="by_role" class="custom-control-input" id="customSwitch_role" value="1" <?php checked( $settings['by_role'] ); ?>>
+						<label class="custom-control-label" for="customSwitch_role"><?php esc_html_e( 'Customize by user role', 'tuxedo-big-file-uploads' ); ?></label>
+					</div>
+					<div class="<?php echo $settings['by_role'] ? 'bfu-disabled' : ''; ?>" id="bfu-settings">
+						<div class="row justify-content-end">
+							<div class="pl-5 col-xl-6 col-lg-7 col-md-8 text-left"><strong><?php esc_html_e( 'All Users', 'tuxedo-big-file-uploads' ); ?></strong></div>
+						</div>
+						<div class="row mb-3 justify-content-end">
+							<div class="col-xl-6 col-lg-7 col-md-8">
+								<div class="input-group bfu-input-limit">
+									<input name="upload_limit" id="upload-limit" type="number" step="0.1" min="0" value="<?php echo esc_attr( $settings['limits']['all']['bytes'] ); ?>" class="form-control text-right"
+									       aria-label="<?php esc_attr_e( 'All users upload limit', 'tuxedo-big-file-uploads' ); ?>">
+									<div class="input-group-append">
+										<select name="upload_limit_format" id="upload-limit-format">
+											<option <?php selected( $settings['limits']['all']['format'], 'MB' ); ?> value="MB">MB</option>
+											<option <?php selected( $settings['limits']['all']['format'], 'GB' ); ?> value="GB">GB</option>
+										</select>
+									</div>
+								</div>
+								<div class="row text-center">
+									<div class="col">
+										<small><?php printf( esc_html__( 'Maximum Upload Size (default is %s)', 'tuxedo-big-file-uploads' ), size_format( $this->max_upload_size ) ); ?> <span class="dashicons dashicons-info text-muted" data-toggle="tooltip" title="<?php esc_attr_e( 'Default size is defined by your hosting provider', 'tuxedo-big-file-uploads' ); ?>"></span></small>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
+					<div class="<?php echo $settings['by_role'] ? '' : 'bfu-disabled'; ?>" id="bfu-settings-roles">
+						<?php
+						foreach ( wp_roles()->roles as $role_key => $role ) {
+							if ( isset( $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'] ) {
+								?>
+								<div class="row justify-content-end">
+									<div class="pl-5 col-xl-6 col-lg-7 col-md-8 text-left"><strong><?php echo esc_html( translate_user_role( $role['name'] ) ); ?></strong></div>
+								</div>
+								<div class="row mb-3 justify-content-end">
+									<div class="col-xl-6 col-lg-7 col-md-8">
+										<div class="input-group bfu-input-limit">
+											<input name="upload_limit[<?php echo esc_attr( $role_key ); ?>]" id="upload-limit-<?php echo esc_attr( $role_key ); ?>" type="number" step="0.1" min="0" value="<?php echo esc_attr( $settings['limits'][ $role_key ]['bytes'] ); ?>"
+											       class="form-control text-right" aria-label="<?php printf( esc_attr__( '%s upload limit', 'tuxedo-big-file-uploads' ), translate_user_role( $role['name'] ) ); ?>">
+											<div class="input-group-append">
+												<select name="upload_limit_format[<?php echo esc_attr( $role_key ); ?>]" id="upload-limit-format-<?php echo esc_attr( $role_key ); ?>">
+													<option <?php selected( $settings['limits'][ $role_key ]['format'], 'MB' ); ?> value="MB">MB</option>
+													<option <?php selected( $settings['limits'][ $role_key ]['format'], 'GB' ); ?> value="GB">GB</option>
+												</select>
+											</div>
+										</div>
+										<div class="row text-center">
+											<div class="col">
+												<small><?php printf( esc_html__( 'Maximum Upload Size (default is %s)', 'tuxedo-big-file-uploads' ), size_format( $this->max_upload_size ) ); ?> <span class="dashicons dashicons-info text-muted" data-toggle="tooltip" title="<?php esc_attr_e( 'Default size is defined by your hosting provider', 'tuxedo-big-file-uploads' ); ?>"></span></small>
+											</div>
+										</div>
+									</div>
+								</div>
+							<?php }
+						} ?>
+					</div>
+				</div>
+			</div>
+			<div class="row justify-content-center mb-4">
+				<div class="col-xl-2 col-lg-3 col-md-4 text-center">
+					<button class="btn text-nowrap btn-info btn-lg btn-block" name="bfu_settings_submit" value="1" type="submit"><?php esc_html_e( 'Save', 'tuxedo-big-file-uploads' ); ?></button>
 				</div>
 			</div>
 			<?php if ( ! class_exists( 'Infinite_Uploads' ) ) { ?>

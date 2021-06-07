@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Big File Uploads
  * Description: Increase the file upload limit in the standard built-in WordPress media uploader. Uploads can be as large as available disk space allows.
- * Version:     2.0
+ * Version:     2.0-beta-2
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * License:     GPLv2 or later
@@ -418,7 +418,7 @@ class BigFileUploads {
 			$_FILES['async-upload']['size'] = filesize( $_FILES['async-upload']['tmp_name'] );
 			//$wp_filetype = wp_check_filetype_and_ext( $_FILES['async-upload']['tmp_name'], $_FILES['async-upload']['tmp_name'] );
 			$_FILES['async-upload']['type'] = $this->get_mime_content_type( $_FILES['async-upload']['tmp_name'] );
-			$_FILES['async-upload']['type'] = $wp_filetype['type'];
+			//$_FILES['async-upload']['type'] = $wp_filetype['type'];
 			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 
 			if ( ! isset( $_REQUEST['short'] ) || ! isset( $_REQUEST['type'] ) ) {
