@@ -1,0 +1,279 @@
+body {
+  background-color: rgb(241, 241, 241);
+}
+
+/* Fixes conflict with woosquared */
+.modal {
+  z-index: 99999;
+}
+
+/* Fixes conflict with wp core on mobile hidding modal under background fade */
+body.mobile.modal-open #wpwrap {
+  position: relative;
+}
+
+.card {
+  margin-top: inherit;
+  padding: inherit;
+  min-width: inherit;
+  max-width: inherit;
+  box-shadow: inherit;
+  background: inherit;
+  box-sizing: inherit;
+  background-color: #ffffff;
+}
+
+.card-header {
+  background-color: #ffffff;
+}
+
+.card-body.cloud {
+  background: bottom url("../img/wave-bg.svg") no-repeat;
+  background-size: 100% auto;
+}
+
+.badge-primary {
+  background-color: rgba(38, 169, 224, 1);
+}
+
+.badge-primary:hover, .badge-primary:active, .badge-primary:focus {
+  background-color: rgba(38, 169, 224, 0.7);
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.badge-primary:active {
+  background-color: rgba(38, 169, 224, 0.9);
+}
+
+.btn-group-lg > .btn, .btn-lg {
+  padding: .5rem 2rem;
+}
+
+.btn-primary {
+  background-color: rgba(38, 169, 224, 1);
+  border-radius: 24px;
+  border-width: 0;
+}
+
+.btn-primary:hover, .btn-primary:active, .btn-primary:focus {
+  background-color: rgba(38, 169, 224, 0.7) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.btn-primary:active {
+  background-color: rgba(38, 169, 224, 0.9) !important;
+}
+
+.btn-info {
+  background-color: #EE7C1E;
+  border-radius: 24px;
+  border-width: 0;
+}
+
+.btn-info:hover, .btn-info:active, .btn-info:focus {
+  background-color: rgba(238, 124, 30, 0.7) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.btn-info:active {
+  background-color: rgba(238, 124, 30, 0.9) !important;
+}
+
+.btn .dashicons {
+  font-size: 1.8rem;
+  line-height: 1;
+  margin-right: 1rem;
+}
+
+.progress {
+  height: 30px;
+  border-radius: 15px;
+  padding: 5px;
+}
+
+.progress .progress-bar {
+  background-color: rgba(38, 169, 224, 1);
+  border-radius: 10px;
+}
+
+.progress.download .progress-bar {
+  background-color: #EE7C1E;
+}
+
+.tooltip {
+  max-width: 150px;
+}
+
+.tooltip .tooltip-inner {
+  background-color: #f1f1f1;
+  color: #2A2A2A;
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.2);
+}
+
+.bs-tooltip-top .arrow {
+  margin-left: 0;
+}
+
+.bs-tooltip-top .arrow:before {
+  border-top-color: #F1F1F1;
+}
+
+.bs-tooltip-bottom .arrow:before {
+  border-bottom-color: #F1F1F1;
+}
+
+.mb-lc-0 > :last-child {
+  margin-bottom: 0 !important;
+}
+
+#bfu-sync-errors, #bfu-download-errors {
+  height: 3em;
+  display: none;
+  overflow-y: scroll;
+}
+
+.bfu-enabled-status .dashicons {
+  font-size: 25px;
+}
+
+.bfu-enabled-status .dashicons-cloud-saved {
+  color: rgba(38, 169, 224, 1);
+}
+
+.bfu-enabled-status .dashicons-cloud-upload {
+  color: #EE7C1E;
+}
+
+p.lead {
+  font-size: 1em;
+}
+
+#bfu-footer .text-muted {
+  color: rgba(108, 117, 125, 0.5) !important;
+}
+
+.bfu-refresh-icon .dashicons {
+  font-size: 25px;
+}
+
+.text-warning, .text-warning a {
+  color: #EE7C1E !important;
+  font-weight: 500;
+}
+
+#bfu-error {
+  display: none;
+}
+
+#bfu-scan-progress, #bfu-scan-remote-progress, #bfu-upload-progress, #bfu-download-progress {
+  display: none;
+}
+
+#bfu-local-pie, #bfu-cloud-pie, .bfu-pie-wrapper {
+  max-height: 300px;
+  max-width: 600px;
+}
+
+#bfu-enable-errors .alert-link {
+  float: right;
+}
+
+#bfu-enable-errors .alert-link:hover {
+  text-decoration: none;
+}
+
+#bfu-enable-errors .dashicons {
+  line-height: 1.2;
+}
+
+#bfu-collapse-errors {
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
+#bfu-collapse-errors .list-group-item {
+  padding: 0.25rem 1.25rem;
+  margin: 0;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+  color: #fff;
+  border-color: rgba(38, 169, 224, 1);
+  background-color: rgba(38, 169, 224, 1);
+}
+
+.custom-filetype.custom-control-input:checked ~ .custom-filetype.custom-control-label::before {
+  border-color: #EE7C1E;
+  background-color: #EE7C1E;
+}
+
+.badge-core {
+  color: #fff;
+  background-color: #26A9E0;
+}
+
+.badge-addon {
+  color: #fff;
+  background-color: #EE7C1E;
+}
+
+/* filetype list */
+.card-columns .card-header {
+  cursor: pointer;
+  background-color: rgb(241, 241, 241);
+}
+
+.card-columns .card-header:after {
+  font-family: dashicons;
+  content: "\f343";
+  float: right;
+}
+
+.card-columns .card-header.collapsed:after {
+  /* symbol for "collapsed" panels */
+  content: "\f347";
+}
+
+.bfu-input-limit input {
+  border-radius: 30px 0 0 30px;
+  font-size: 1.2em;
+  font-weight: bold;
+  background-color: rgb(241, 241, 241);
+}
+
+.bfu-input-limit .input-group-append select {
+  border-radius: 0 30px 30px 0;
+  font-size: 1.1em;
+  font-weight: bold;
+  background-color: rgb(241, 241, 241);
+}
+
+.bfu-input-subscribe input {
+  border-radius: 30px 0 0 30px;
+  text-align: center;
+  background-color: rgb(241, 241, 241);
+}
+
+.bfu-input-subscribe .input-group-btn button {
+  border-radius: 0 30px 30px 0;
+  line-height: 1.65;
+}
+
+.card-body.scan {
+  background: top url("../img/scan-preview.jpg") no-repeat;
+  background-size: 80% auto;
+}
+
+.bfu-disabled {
+  opacity: 0.5;
+}
+
+.dashicons-info {
+  font-size: 15px;
+  height: 15px;
+  width: 15px;
+  vertical-align: text-top;
+}

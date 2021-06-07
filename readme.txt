@@ -1,4 +1,4 @@
-=== Tuxedo Big File Uploads ===
+=== Big File Uploads ===
 Contributors: andtrev
 Tags: AJAX, file uploader, files, files uploader, ftp, image uploader, plugin, upload
 Requires at least: 3.4

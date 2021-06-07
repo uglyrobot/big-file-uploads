@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1190" height="300" viewBox="0 0 1190 300">
+  <defs>
+    <style>
+      .cls-1 {
+      fill: #f1f1f1;
+      fill-rule: evenodd;
+      opacity: 0.3;
+      }
+    </style>
+  </defs>
+  <path id="Wave" class="cls-1" d="M195,523.781s131.407-192.134,319-37.772,450.273,94.3,545,38.489,326,17.429,326,17.429V831H195V523.781Z" transform="translate(-195 -426)"/>
+</svg>
