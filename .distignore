@@ -1,0 +1,10 @@
+/.git
+/.github
+/.wordpress-org
+.distignore
+.gitattributes
+.gitignore
+composer.lock
+package.json
+package-lock.json
+README.md

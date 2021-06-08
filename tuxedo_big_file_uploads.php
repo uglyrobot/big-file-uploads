@@ -1,10 +1,11 @@
 <?php
 /**
  * Plugin Name: Big File Uploads
- * Description: Increase the file upload limit in the standard built-in WordPress media uploader. Uploads can be as large as available disk space allows.
- * Version:     2.0-beta-2
+ * Description: Enable large file uploads in the built-in WordPress media uploader via file chunking, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
+ * Version:     2.0-beta-3
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
+ * Network:     true
  * License:     GPLv2 or later
  * Domain Path: /languages
  * Text Domain: tuxedo-big-file-uploads
@@ -114,6 +115,7 @@ class BigFileUploads {
 
 		if ( is_main_site() ) {
 			add_action( 'wp_ajax_bfu_file_scan', [ &$this, 'ajax_file_scan' ] );
+			add_action( 'wp_ajax_bfu_upload_dismiss', [ &$this, 'ajax_upload_dismiss' ] );
 			add_action( 'wp_ajax_bfu_upgrade_dismiss', [ &$this, 'ajax_upgrade_dismiss' ] );
 		}
 
@@ -230,11 +232,25 @@ class BigFileUploads {
 		$dismissed = get_user_option( 'bfu_notice_dismissed', get_current_user_id() );
 		if ( ! class_exists( 'Infinite_Uploads' ) && ! $dismissed ) {
 			?>
-			<small>
-				<?php esc_html_e( 'Want unlimited storage space?', 'tuxedo-big-file-uploads' ); ?> <a href="<?php echo esc_url( $this->settings_url() ); ?>#upgrade-modal"><?php esc_html_e( 'Move your media files to the Infinite Uploads cloud', 'tuxedo-big-file-uploads' ); ?>.</a>
-			</small>
-			<a style="width:12px;height:12px;font-size:12px;vertical-align:middle;" class="dashicons dashicons-no" title="<?php esc_attr_e( 'Dismiss', 'tuxedo-big-file-uploads' ); ?>" href="<?php echo esc_url( $this->settings_url( [ 'dismiss' => 1 ] ) ); ?>"><span
-					class="screen-reader-text"><?php esc_html_e( 'Dismiss', 'tuxedo-big-file-uploads' ); ?></span></a>
+			<script>
+				(function ($) {
+					'use strict';
+					$(function () {
+						var $notice = $('#bfu-upload-notice');
+						$notice.children('a.dashicons').on('click', function (event, el) {
+							$.get(ajaxurl + '?action=bfu_upload_dismiss');
+							$notice.hide();
+						});
+					});
+				})(jQuery);
+			</script>
+			<span id="bfu-upload-notice">
+				<small>
+					<?php esc_html_e( 'Want unlimited storage space?', 'tuxedo-big-file-uploads' ); ?> <a href="<?php echo esc_url( $this->settings_url() ); ?>#upgrade-modal"><?php esc_html_e( 'Move your media files to the Infinite Uploads cloud', 'tuxedo-big-file-uploads' ); ?>.</a>
+				</small>
+				<a style="width:12px;height:12px;font-size:12px;vertical-align:middle;" class="dashicons dashicons-no" title="<?php esc_attr_e( 'Dismiss', 'tuxedo-big-file-uploads' ); ?>" href="#"><span
+						class="screen-reader-text"><?php esc_html_e( 'Dismiss', 'tuxedo-big-file-uploads' ); ?></span></a>
+			</span>
 			<?php
 		}
 	}
@@ -273,7 +289,22 @@ class BigFileUploads {
 	}
 
 	/**
-	 * Output one time upgrade notice to previous users.
+	 * AJAX endpoint to dismiss upload page notice.
+	 *
+	 * @since 2.0
+	 */
+	public function ajax_upload_dismiss() {
+		if ( ! current_user_can( $this->capability ) ) {
+			wp_send_json_error();
+		}
+
+		update_user_option( get_current_user_id(), 'bfu_notice_dismissed', 1 );
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX endpoint to dismiss upgrade notice.
 	 *
 	 * @since 2.0
 	 */
@@ -698,7 +729,7 @@ class BigFileUploads {
 
 		$save_error = $save_success = false;
 		if ( isset( $_POST['bfu_settings_submit'] ) ) {
-			if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'bfu_settiings' ) ) {
+			if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'bfu_settings' ) ) {
 				wp_die( esc_html__( 'Permissions Error: Please refresh the page and try again.', 'tuxedo-big-file-uploads' ) );
 			}
 
@@ -742,16 +773,6 @@ class BigFileUploads {
 				delete_user_option( get_current_user_id(), 'bfu_upgrade_notice_dismissed' );
 			}
 
-			if ( isset( $_GET['dismiss'] ) ) {
-				update_user_option( get_current_user_id(), 'bfu_notice_dismissed', 1 );
-				?>
-				<div class="alert alert-success mt-2 alert-dismissible fade show" role="alert">
-					<?php esc_html_e( 'Upload form notice dismissed!', 'tuxedo-big-file-uploads' ); ?>
-					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-			<?php }
 			if ( $save_success ) {
 				?>
 				<div class="alert alert-success mt-2 alert-dismissible fade show" role="alert">

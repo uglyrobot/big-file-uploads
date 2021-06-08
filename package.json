@@ -1,0 +1,24 @@
+{
+  "name": "big-file-uploads",
+  "version": "2.0",
+  "description": "Enable large file uploads in the built-in WordPress media uploader via file chunking, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.",
+  "dependencies": {
+    "chart.js": "^2.9.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uglyrobot/big-file-uploads.git"
+  },
+  "keywords": [
+    "storage",
+    "wordpress",
+    "plugin",
+    "uploads"
+  ],
+  "author": "UglyRobot, LLC",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/uglyrobot/big-file-uploads/issues"
+  },
+  "homepage": "https://infiniteuploads.com"
+}
