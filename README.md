@@ -8,7 +8,7 @@ Big File Uploads
 
 License: GPLv2 https://www.gnu.org/licenses/gpl-2.0.html
 
-### Description
+## Description
 
 **Big File Uploads lets you upload large media files directly to the WordPress media library. Simply increase the maximum upload size to any value – as large as your available disk space allows.**
 
@@ -68,30 +68,30 @@ Other plugins simply rewrite the .htaccess or php.ini files in an attempt to adj
 Big File Uploads is built to work with [Infinite Uploads](https://github.com/plugins/infinite-uploads/) to make your site's upload directory infinitely scalable. A large WordPress media library can slow down your server and run up the cost of bandwidth and storage with your hosting provider. Move your uploads directory to the Infinite Uploads cloud to save on storage and bandwidth and improve site performance and security. Learn more about [Infinite Uploads cloud storage and content delivery network](https://infiniteuploads.com/?utm_source=github.com&utm_medium=readme&utm_campaign=bfu_readme&utm_term=promo).
 
 
-### Privacy
+## Privacy
 
 This plugin does not collect or share any data. Site admins can optionally subscribe to email updates which is subject to our [Privacy Policy](https://infiniteuploads.com/privacy/?utm_source=github.com&utm_medium=readme&utm_campaign=bfu_readme&utm_term=privacy).
 
-### Frequently Asked Questions
+## Frequently Asked Questions
 
-= What is the biggest file size that can be uploaded? =
+### What is the biggest file size that can be uploaded?
 
 Uploads can be as large as available disk space for temporary files allows, or up to the maximum upload size limit you set in Settings -> Big File Uploads -> Uploading Files.
 
-= Is Big File Uploads a free plugin? =
+### Is Big File Uploads a free plugin?
 
 Yes all features of the Big File Uploads plugin are completely free and do not have a premium upgrade.
 
-= What media files can be uploaded? Are there any limitations with Big File Uploads? =
+### What media files can be uploaded? Are there any limitations with Big File Uploads?
 
 If you can upload it to the WordPress media library, Big File Uploads can process it. Big File Uploads can process everything from images and archive files to huge video and audio files.
 
-= Is Infinite Uploads required for Big File Uploads to work? =
+### Is Infinite Uploads required for Big File Uploads to work?
 
 No. [Infinite Uploads](https://github.com/plugins/infinite-uploads/) is an optional service to offload your media files to the cloud and make your WordPress website storage infinitely scalable. Perfect for sites that need to store many large file uploads.
 
 
-== About Us ==
+## About Us
 Infinite Uploads builds WordPress plugins and is a premium cloud storage provider and content delivery network (CDN) for all your WordPress media files. Learn more here:
 [infiniteuploads.com](https://infiniteuploads.com/?utm_source=github.com&utm_medium=readme&utm_campaign=bfu_readme&utm_term=about_us)
 
@@ -102,8 +102,8 @@ Learn how to manage large files on our blog:
 
 Enjoy!
 
-== Contact and Credits ==
+## Contact and Credits
 
 Maintained by the cloud architects and WordPress engineers at [Infinite Uploads](https://infiniteuploads.com/?utm_source=github.com&utm_medium=readme&utm_campaign=bfu_readme&utm_term=credits).
 
-Big File Uploads was originally created by Trevor Anderson ([@andtrev on github.com](https://profiles.github.com/andtrev/), 2015-2021. Find Trevor on [GitHub](https://github.com/andtrev).
+Big File Uploads was originally "Tuxedo Big File Uploads" created by Trevor Anderson ([@andtrev on WordPress.org](https://profiles.wordpress.org/andtrev/)), 2015-2021. Find Trevor on [GitHub](https://github.com/andtrev).

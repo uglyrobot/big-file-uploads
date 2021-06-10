@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Big File Uploads
  * Description: Enable large file uploads in the built-in WordPress media uploader via file chunking, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
- * Version:     2.0-beta-3
+ * Version:     2.0-beta-4
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * Network:     true
@@ -29,6 +29,10 @@
  * @package BigFileUploads
  * @version 2.0
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	die();
+}
 
 define( 'BIG_FILE_UPLOADS_VERSION', '2.0' );
 
@@ -117,6 +121,7 @@ class BigFileUploads {
 			add_action( 'wp_ajax_bfu_file_scan', [ &$this, 'ajax_file_scan' ] );
 			add_action( 'wp_ajax_bfu_upload_dismiss', [ &$this, 'ajax_upload_dismiss' ] );
 			add_action( 'wp_ajax_bfu_upgrade_dismiss', [ &$this, 'ajax_upgrade_dismiss' ] );
+			add_action( 'wp_ajax_bfu_subscribe_dismiss', [ &$this, 'ajax_subscribe_dismiss' ] );
 		}
 
 		if ( is_multisite() ) {
@@ -314,6 +319,21 @@ class BigFileUploads {
 		}
 
 		update_user_option( get_current_user_id(), 'bfu_upgrade_notice_dismissed', 1 );
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX endpoint to dismiss subscribe notice.
+	 *
+	 * @since 2.0
+	 */
+	public function ajax_subscribe_dismiss() {
+		if ( ! current_user_can( $this->capability ) ) {
+			wp_send_json_error();
+		}
+
+		update_user_option( get_current_user_id(), 'bfu_subscribe_notice_dismissed', 1 );
 
 		wp_send_json_success();
 	}
@@ -771,6 +791,7 @@ class BigFileUploads {
 			if ( isset( $_GET['undismiss'] ) ) {
 				delete_user_option( get_current_user_id(), 'bfu_notice_dismissed' );
 				delete_user_option( get_current_user_id(), 'bfu_upgrade_notice_dismissed' );
+				delete_user_option( get_current_user_id(), 'bfu_subscribe_notice_dismissed' );
 			}
 
 			if ( $save_success ) {
@@ -798,26 +819,35 @@ class BigFileUploads {
 			$settings = $this->get_settings( true );
 			require_once( dirname( __FILE__ ) . '/templates/settings.php' );
 
-			$scan_results = get_site_option( 'tuxbfu_file_scan' );
-			if ( isset( $scan_results['scan_finished'] ) && $scan_results['scan_finished'] ) {
-				if ( isset( $scan_results['types'] ) ) {
-					$total_files   = array_sum( wp_list_pluck( $scan_results['types'], 'files' ) );
-					$total_storage = array_sum( wp_list_pluck( $scan_results['types'], 'size' ) );
+			if ( ! class_exists( 'Infinite_Uploads' ) ) {
+				$scan_results = get_site_option( 'tuxbfu_file_scan' );
+				if ( isset( $scan_results['scan_finished'] ) && $scan_results['scan_finished'] ) {
+					if ( isset( $scan_results['types'] ) ) {
+						$total_files   = array_sum( wp_list_pluck( $scan_results['types'], 'files' ) );
+						$total_storage = array_sum( wp_list_pluck( $scan_results['types'], 'size' ) );
+					} else {
+						$total_files   = 0;
+						$total_storage = 0;
+					}
+					require_once( dirname( __FILE__ ) . '/templates/scan-results.php' );
 				} else {
-					$total_files   = 0;
-					$total_storage = 0;
+					require_once( dirname( __FILE__ ) . '/templates/scan-start.php' );
 				}
-				require_once( dirname( __FILE__ ) . '/templates/scan-results.php' );
-			} else {
-				require_once( dirname( __FILE__ ) . '/templates/scan-start.php' );
 			}
 			?>
 		</div>
 		<?php
 		require_once( dirname( __FILE__ ) . '/templates/footer.php' );
 
-		require_once( dirname( __FILE__ ) . '/templates/modal-scan.php' );
-		require_once( dirname( __FILE__ ) . '/templates/modal-subscribe.php' );
+		if ( ! class_exists( 'Infinite_Uploads' ) ) {
+			require_once( dirname( __FILE__ ) . '/templates/modal-scan.php' );
+
+			$dismissed = get_user_option( 'bfu_subscribe_notice_dismissed', get_current_user_id() );
+			if ( ! $dismissed ) {
+				require_once( dirname( __FILE__ ) . '/templates/modal-subscribe.php' );
+			}
+		}
+
 		require_once( dirname( __FILE__ ) . '/templates/modal-upgrade.php' );
 	}
 

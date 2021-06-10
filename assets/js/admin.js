@@ -45,12 +45,16 @@ jQuery(document).ready(function ($) {
           fileScan(json.data.remaining_dirs);
         } else {
           bfuProcessingLoop = false;
-          //location.reload();
-          $('.modal').modal('hide');
-          $('#subscribe-modal').modal({
-            backdrop: 'static',
-            keyboard: false
-          });
+          //if they have not dismissed subscribe
+          if ( $('#subscribe-modal').length ) {
+            $('.modal').modal('hide');
+            $('#subscribe-modal').modal({
+              backdrop: 'static',
+              keyboard: false
+            });
+          } else {
+            location.reload();
+          }
           return true;
         }
 
@@ -73,6 +77,11 @@ jQuery(document).ready(function ($) {
     bfuStopLoop = true;
     bfuProcessingLoop = false;
   });
+
+  //Make sure scan modal closes
+  $('#subscribe-modal').on('shown.bs.modal', function () {
+    $('#scan-modal').modal('hide');
+  })
 
   //handle upload limit field MB/GB changes
   $('.bfu-input-limit select').on('change', function () {
@@ -106,7 +115,25 @@ jQuery(document).ready(function ($) {
   });
 
   $('#bfu-view-results').on('click', function () {
-    location.reload();
+    $.get(ajaxurl + '?action=bfu_subscribe_dismiss', function( data ) {
+      console.log(data);
+      location.reload();
+    });
+  });
+
+  var mc1Submitted = false;
+  $('#mc-embedded-subscribe-form').on('submit reset', function (event) {
+    console.log(event);
+    if ("submit" === event.type) {
+      mc1Submitted = true;
+    } else if ( "reset" === event.type && mc1Submitted ) {
+      console.log('success');
+      $('#bfu-subscribe-button').prop('disabled', true);
+      $.get(ajaxurl + '?action=bfu_subscribe_dismiss', function( data ) {
+        console.log(data);
+        location.reload();
+      });
+    }
   });
 
   //Charts

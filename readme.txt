@@ -151,4 +151,4 @@ Enjoy!
 
 Maintained by the cloud architects and WordPress engineers at [Infinite Uploads](https://infiniteuploads.com/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=bfu_readme&utm_term=credits).
 
-Big File Uploads was originally created by Trevor Anderson ([@andtrev on WordPress.org](https://profiles.wordpress.org/andtrev/), 2015-2021. Find Trevor on [GitHub](https://github.com/andtrev).
+Big File Uploads was originally "Tuxedo Big File Uploads" created by Trevor Anderson ([@andtrev on WordPress.org](https://profiles.wordpress.org/andtrev/)), 2015-2021. Find Trevor on [GitHub](https://github.com/andtrev).
