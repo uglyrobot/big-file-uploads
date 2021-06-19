@@ -17,9 +17,9 @@ Enable large file uploads in the built-in WordPress media uploader via file chun
 
 == Description ==
 
-**Big File Uploads lets you upload large media files directly to the WordPress media library. Simply increase the maximum upload size to any value – as large as your available disk space allows.**
+**Big File Uploads lets you upload large media files directly to the media library with the WordPress media uploader. Increase your maximum upload size to any value – as large as your available disk space allows – and add file chunking to avoid server timeout errors.**
 
-File upload limits set by your server configuration or hosting provider prevent uploading large files to your media library.
+Bypass the upload limits on your server, set by your hosting provider, that prevent you from uploading large files to your media library.
 
 Big File Uploads automatically detects upload limits set by your server or hosting provider, allows you to increase the maximum upload size, and prevents timeout errors by uploading files in chunks.
 
