@@ -89,6 +89,10 @@ Uploads can be as large as available disk space for temporary files allows, or u
 
 Yes all features of the Big File Uploads plugin are completely free and do not have a premium upgrade.
 
+= Will Big File Uploads allow me to increase the upload limit for a form plugin (or other plugin) that allow users to upload on the frontend of my website? =
+
+No. Frontend uploading built-in to plugins like Forminator, Gravity Forms, and WPForms do not use the same process as the WordPress media uploader on the backend of WordPress. Big File Uploads only works with the backend uploader or plugins that use the built-in media uploader code base to process the files.
+
 = What media files can be uploaded? Are there any limitations with Big File Uploads? =
 
 If you can upload it to the WordPress media library, Big File Uploads can process it. Big File Uploads can process everything from images and archive files to huge video and audio files.
