@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Big File Uploads
- * Description: Enable large file uploads in the built-in WordPress media uploader via file chunking, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
- * Version:     2.0-beta-4
+ * Description: Enable large file uploads in the built-in WordPress media uploader via multipart uploads, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
+ * Version:     2.0
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * Network:     true
@@ -214,7 +214,11 @@ class BigFileUploads {
 	 * @return false|int $bytes Free disk space in bytes.
 	 */
 	public function temp_available_size() {
-		$bytes = disk_free_space( sys_get_temp_dir() );
+		if ( function_exists( 'disk_free_space' ) ) {
+			$bytes = disk_free_space( sys_get_temp_dir() );
+		} else {
+			$bytes = false;
+		}
 
 		return $bytes;
 	}
@@ -574,7 +578,7 @@ class BigFileUploads {
 		if ( ! isset( $settings['limits']['all']['bytes'] ) ) {
 			$old_max_upload_size = get_site_option( 'tuxbfu_max_upload_size' );
 			if ( $old_max_upload_size ) {
-				$settings['limits']['all']['bytes'] = $old_max_upload_size;
+				$settings['limits']['all']['bytes'] = $old_max_upload_size * MB_IN_BYTES;
 			} elseif ( $old_max_upload_size === 0 ) {
 				$settings['limits']['all']['bytes'] = GB_IN_BYTES * 5; //default to 5GB if they had unlimited set before
 			} else {
@@ -706,7 +710,7 @@ class BigFileUploads {
 	function admin_scripts() {
 		wp_enqueue_script( 'bfu-bootstrap', plugins_url( 'assets/bootstrap/js/bootstrap.bundle.min.js', __FILE__ ), [ 'jquery' ], BIG_FILE_UPLOADS_VERSION );
 		wp_enqueue_script( 'bfu-chartjs', plugins_url( 'assets/js/Chart.min.js', __FILE__ ), [], BIG_FILE_UPLOADS_VERSION );
-		wp_enqueue_script( 'bfu-js', plugins_url( 'assets/js/admin.js', __FILE__ ), [], BIG_FILE_UPLOADS_VERSION );
+		wp_enqueue_script( 'bfu-js', plugins_url( 'assets/js/admin.js', __FILE__ ), [ 'bfu-bootstrap', 'bfu-chartjs' ], BIG_FILE_UPLOADS_VERSION );
 
 		$data                        = [];
 		$data['strings']             = [
@@ -767,7 +771,7 @@ class BigFileUploads {
 				}
 				$settings['by_role'] = true;
 			} else {
-				if ( absint( $_POST['upload_limit'] ) <= 0 ) {
+				if ( $_POST['upload_limit'] <= 0 ) {
 					$save_error = true;
 				} else {
 					$settings['limits']['all']['bytes']  = absint( $_POST['upload_limit'] * ( $_POST['upload_limit_format'] == 'MB' ? MB_IN_BYTES : GB_IN_BYTES ) );
