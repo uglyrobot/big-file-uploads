@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Big File Uploads
  * Description: Enable large file uploads in the built-in WordPress media uploader via multipart uploads, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
- * Version:     2.0
+ * Version:     2.0.1
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * Network:     true
@@ -235,33 +235,27 @@ class BigFileUploads {
 		?>
 		<script type="text/javascript">
 			jQuery(".max-upload-size").append(' <small><a style="text-decoration:none;" href="<?php echo esc_url( $this->settings_url() ); ?>"><?php esc_html_e( 'Change', 'tuxedo-big-file-uploads' ); ?></a></small>');
-		</script>
 
 		<?php
 		$dismissed = get_user_option( 'bfu_notice_dismissed', get_current_user_id() );
 		if ( ! class_exists( 'Infinite_Uploads' ) && ! $dismissed ) {
 			?>
-			<script>
-				(function ($) {
-					'use strict';
-					$(function () {
-						var $notice = $('#bfu-upload-notice');
-						$notice.children('a.dashicons').on('click', function (event, el) {
-							$.get(ajaxurl + '?action=bfu_upload_dismiss');
-							$notice.hide();
-						});
+			(function ($) {
+				'use strict';
+				$(".max-upload-size").after('<span class="bfu-upload-notice"><small><?php esc_html_e( 'Want unlimited storage space?', 'tuxedo-big-file-uploads' ); ?> <a href="<?php echo esc_url( $this->settings_url() ); ?>#upgrade-modal"><?php esc_html_e( 'Move your media files to the Infinite Uploads cloud', 'tuxedo-big-file-uploads' ); ?>.</a></small><a style="width:12px;height:12px;font-size:12px;vertical-align:middle;" class="dashicons dashicons-no" title="<?php esc_attr_e( 'Dismiss', 'tuxedo-big-file-uploads' ); ?>" href="#"><span class="screen-reader-text"><?php esc_html_e( 'Dismiss', 'tuxedo-big-file-uploads' ); ?></span></a></span>');
+				$(function () {
+					var $notice = $('.bfu-upload-notice');
+					$notice.children('a.dashicons').on('click', function (event, el) {
+						$.get(ajaxurl + '?action=bfu_upload_dismiss');
+						$notice.hide();
 					});
-				})(jQuery);
-			</script>
-			<span id="bfu-upload-notice">
-				<small>
-					<?php esc_html_e( 'Want unlimited storage space?', 'tuxedo-big-file-uploads' ); ?> <a href="<?php echo esc_url( $this->settings_url() ); ?>#upgrade-modal"><?php esc_html_e( 'Move your media files to the Infinite Uploads cloud', 'tuxedo-big-file-uploads' ); ?>.</a>
-				</small>
-				<a style="width:12px;height:12px;font-size:12px;vertical-align:middle;" class="dashicons dashicons-no" title="<?php esc_attr_e( 'Dismiss', 'tuxedo-big-file-uploads' ); ?>" href="#"><span
-						class="screen-reader-text"><?php esc_html_e( 'Dismiss', 'tuxedo-big-file-uploads' ); ?></span></a>
-			</span>
+				});
+			})(jQuery);
 			<?php
 		}
+		?>
+		</script>
+		<?php
 	}
 
 	/**
