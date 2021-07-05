@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-define( 'BIG_FILE_UPLOADS_VERSION', '2.0' );
+define( 'BIG_FILE_UPLOADS_VERSION', '2.0.1' );
 
 /**
  * Big File Uploads manager class.

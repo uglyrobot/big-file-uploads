@@ -113,7 +113,7 @@ No. [Infinite Uploads](https://wordpress.org/plugins/infinite-uploads/) is an op
 
 2.0.1 - 2021-6-30
 ----------------------------------------------------------------------
-- Bug fix: Sometimes the upgrade notice showed in wrong places in the admin area
+- Bug fix: Sometimes the upgrade notice showed in wrong places in the admin area. props Nick H.
 
 2.0 - 2021-6-20
 ----------------------------------------------------------------------
