@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Big File Uploads
  * Description: Enable large file uploads in the built-in WordPress media uploader via multipart uploads, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
- * Version:     2.0.1
+ * Version:     2.0.2-beta-1
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * Network:     true
@@ -165,11 +165,19 @@ class BigFileUploads {
 	 */
 	public function filter_plupload_settings( $plupload_settings ) {
 
-		if ( ! defined( 'BIG_FILE_UPLOADS_CHUNK_SIZE_KB' ) ) {
-			define( 'BIG_FILE_UPLOADS_CHUNK_SIZE_KB', 2048 );
+		$max_chunk = ( MB_IN_BYTES * 20 ); //20MB max chunk size (to avoid timeouts)
+		if ( $max_chunk > $this->max_upload_size ) {
+			$default_chunk = ( $this->max_upload_size * 0.8 ) / KB_IN_BYTES;
+		} else {
+			$default_chunk = $max_chunk / KB_IN_BYTES;
 		}
+		//define( 'BIG_FILE_UPLOADS_CHUNK_SIZE_KB', 512 );//TODO remove
+		if ( ! defined( 'BIG_FILE_UPLOADS_CHUNK_SIZE_KB' ) ) {
+			define( 'BIG_FILE_UPLOADS_CHUNK_SIZE_KB', $default_chunk );
+		}
+
 		if ( ! defined( 'BIG_FILE_UPLOADS_RETRIES' ) ) {
-			define( 'BIG_FILE_UPLOADS_RETRIES', 3 );
+			define( 'BIG_FILE_UPLOADS_RETRIES', 1 );
 		}
 
 		$plupload_settings['url']                      = admin_url( 'admin-ajax.php' );
@@ -224,18 +232,31 @@ class BigFileUploads {
 	}
 
 	/**
-	 * Output html on the upload form.
+	 * Enqueue html on the upload form.
 	 *
 	 * @since 2.0
 	 */
 	public function upload_output() {
-		if ( ! current_user_can( $this->capability ) ) {
+		global $pagenow;
+		if ( ! current_user_can( $this->capability ) || is_null( $pagenow ) || ! in_array( $pagenow, array( 'post-new.php', 'post.php', 'upload.php', 'media-new.php' ) ) ) {
 			return;
 		}
 		?>
 		<script type="text/javascript">
-			jQuery(".max-upload-size").append(' <small><a style="text-decoration:none;" href="<?php echo esc_url( $this->settings_url() ); ?>"><?php esc_html_e( 'Change', 'tuxedo-big-file-uploads' ); ?></a></small>');
+			//When each chunk is uploaded, check if there were any errors or not and stop the rest
+			jQuery(function() {
+				if ( typeof uploader !== 'undefined' ) {
+					uploader.bind('ChunkUploaded', function (up, file, response) {
+						//Stop the upload!
+						if (response.status === 202) {
+							up.removeFile(file);
+							uploadSuccess(file, response.response);
+						}
+					});
+				}
+			});
 
+			jQuery(".max-upload-size").append(' <small><a style="text-decoration:none;" href="<?php echo esc_url( $this->settings_url() ); ?>"><?php esc_html_e( 'Change', 'tuxedo-big-file-uploads' ); ?></a></small>');
 		<?php
 		$dismissed = get_user_option( 'bfu_notice_dismissed', get_current_user_id() );
 		if ( ! class_exists( 'Infinite_Uploads' ) && ! $dismissed ) {
@@ -374,6 +395,10 @@ class BigFileUploads {
 	 * Based on code by Davit Barbakadze
 	 * https://gist.github.com/jayarjo/5846636
 	 *
+	 * Mirrors /wp-admin/async-upload.php
+	 *
+	 * @todo Figure out a way to stop furthur chunks from uploading when there is an error in gutenberg
+	 *
 	 * @since 1.2.0
 	 */
 	public function ajax_chunk_receiver() {
@@ -386,51 +411,72 @@ class BigFileUploads {
 
 		/** Authenticate user. */
 		if ( ! is_user_logged_in() || ! current_user_can( 'upload_files' ) ) {
-			die();
+			wp_die( __( 'Sorry, you are not allowed to upload files.' ) );
 		}
 		check_admin_referer( 'media-form' );
 
 		/** Check and get file chunks. */
-		$chunk  = isset( $_REQUEST['chunk'] ) ? intval( $_REQUEST['chunk'] ) : 0;
+		$chunk  = isset( $_REQUEST['chunk'] ) ? intval( $_REQUEST['chunk'] ) : 0; //zero index
+		$current_part = $chunk + 1;
 		$chunks = isset( $_REQUEST['chunks'] ) ? intval( $_REQUEST['chunks'] ) : 0;
 
 		/** Get file name and path + name. */
 		$fileName = isset( $_REQUEST['name'] ) ? $_REQUEST['name'] : $_FILES['async-upload']['name'];
-		$filePath = dirname( $_FILES['async-upload']['tmp_name'] ) . '/' . md5( $fileName );
+		$filePath = dirname( $_FILES['async-upload']['tmp_name'] ) . '/bfu-' . md5( $fileName ) . '.part';
 
 		$tuxbfu_max_upload_size = $this->get_upload_limit();
-		if ( file_exists( "{$filePath}.part" ) && filesize( "{$filePath}.part" ) + filesize( $_FILES['async-upload']['tmp_name'] ) > $tuxbfu_max_upload_size ) {
+		if ( file_exists( $filePath ) && filesize( $filePath ) + filesize( $_FILES['async-upload']['tmp_name'] ) > $tuxbfu_max_upload_size ) {
 
 			if ( ! $chunks || $chunk == $chunks - 1 ) {
-				@unlink( "{$filePath}.part" );
+				@unlink( $filePath );
 
 				if ( ! isset( $_REQUEST['short'] ) || ! isset( $_REQUEST['type'] ) ) {
-
 					echo wp_json_encode( array(
 						'success' => false,
 						'data'    => array(
 							'message'  => __( 'The file size has exceeded the maximum file size setting.', 'tuxedo-big-file-uploads' ),
-							'filename' => $_FILES['async-upload']['name'],
+							'filename' => $fileName,
 						),
 					) );
 					wp_die();
-
 				} else {
-
-					echo '<div class="error-div error">
-					<a class="dismiss" href="#" onclick="jQuery(this).parents(\'div.media-item\').slideUp(200, function(){jQuery(this).remove();});">' . __( 'Dismiss' ) . '</a>
-					<strong>' . sprintf( __( '&#8220;%s&#8221; has failed to upload.' ), esc_html( $_FILES['async-upload']['name'] ) ) . '<br />' . __( 'The file size has exceeded the maximum file size setting.', 'tuxedo-big-file-uploads' ) . '</strong></div>';
-
+					status_header( 202 );
+					printf(
+						'<div class="error-div error">%s <strong>%s</strong><br />%s</div>',
+						sprintf(
+							'<button type="button" class="dismiss button-link" onclick="jQuery(this).parents(\'div.media-item\').slideUp(200, function(){jQuery(this).remove();});">%s</button>',
+							__( 'Dismiss' )
+						),
+						sprintf(
+						/* translators: %s: Name of the file that failed to upload. */
+							__( '&#8220;%s&#8221; has failed to upload.' ),
+							esc_html( $fileName )
+						),
+						__( 'The file size has exceeded the maximum file size setting.', 'tuxedo-big-file-uploads' )
+					);
+					exit;
 				}
 
 			}
 
 			die();
+		}
 
+		//debugging
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$size = file_exists( $filePath ) ? size_format( filesize( $filePath ), 3 ) : '0 B';
+			error_log( "BFU: Processing \"$fileName\" part $current_part of $chunks as $filePath. $size processed so far." );
 		}
 
 		/** Open temp file. */
-		$out = @fopen( "{$filePath}.part", $chunk == 0 ? 'wb' : 'ab' );
+		if ( $chunk == 0 ) {
+			$out = @fopen( $filePath, 'wb');
+		} elseif ( is_writable( $filePath ) ) { //
+			$out = @fopen( $filePath, 'ab' );
+		} else {
+			$out = false;
+		}
+
 		if ( $out ) {
 
 			/** Read binary input stream and append it to temp file. */
@@ -444,25 +490,81 @@ class BigFileUploads {
 				/** Failed to open input stream. */
 				/** Attempt to clean up unfinished output. */
 				@fclose( $out );
-				@unlink( "{$filePath}.part" );
-				die();
+				@unlink( $filePath );
+				error_log( "BFU: Error reading uploaded part $current_part of $chunks." );
+
+				if ( ! isset( $_REQUEST['short'] ) || ! isset( $_REQUEST['type'] ) ) {
+					echo wp_json_encode(
+						array(
+							'success' => false,
+							'data'    => array(
+								'message'  => sprintf( __( 'There was an error reading uploaded part %d of %d.', 'tuxedo-big-file-uploads' ), $current_part, $chunks ),
+								'filename' => esc_html( $fileName ),
+							),
+						)
+					);
+					wp_die();
+				} else {
+					status_header( 202 );
+					printf(
+						'<div class="error-div error">%s <strong>%s</strong><br />%s</div>',
+						sprintf(
+							'<button type="button" class="dismiss button-link" onclick="jQuery(this).parents(\'div.media-item\').slideUp(200, function(){jQuery(this).remove();});">%s</button>',
+							__( 'Dismiss' )
+						),
+						sprintf(
+						/* translators: %s: Name of the file that failed to upload. */
+							__( '&#8220;%s&#8221; has failed to upload.' ),
+							esc_html( $fileName )
+						),
+						sprintf( __( 'There was an error reading uploaded part %d of %d.', 'tuxedo-big-file-uploads' ), $current_part, $chunks )
+					);
+					exit;
+				}
 			}
 
 			@fclose( $in );
 			@fclose( $out );
-
 			@unlink( $_FILES['async-upload']['tmp_name'] );
-
 		} else {
 			/** Failed to open output stream. */
-			die();
+			error_log( "BFU: Failed to open output stream $filePath to write part $current_part of $chunks." );
+
+			if ( ! isset( $_REQUEST['short'] ) || ! isset( $_REQUEST['type'] ) ) {
+				echo wp_json_encode(
+					array(
+						'success' => false,
+						'data'    => array(
+							'message'  => sprintf( __( 'There was an error opening the temp file %s for writing. Available temp directory space may be exceeded or the temp file was cleaned up before the upload completed.', 'tuxedo-big-file-uploads' ), esc_html( $filePath ) ),
+							'filename' => esc_html( $fileName ),
+						),
+					)
+				);
+				wp_die();
+			} else {
+				status_header( 202 );
+				printf(
+					'<div class="error-div error">%s <strong>%s</strong><br />%s</div>',
+					sprintf(
+						'<button type="button" class="dismiss button-link" onclick="jQuery(this).parents(\'div.media-item\').slideUp(200, function(){jQuery(this).remove();});">%s</button>',
+						__( 'Dismiss' )
+					),
+					sprintf(
+					/* translators: %s: Name of the file that failed to upload. */
+						__( '&#8220;%s&#8221; has failed to upload.' ),
+						esc_html( $fileName )
+					),
+					sprintf( __( 'There was an error opening the temp file %s for writing. Available temp directory space may be exceeded or the temp file was cleaned up before the upload completed.', 'tuxedo-big-file-uploads' ), esc_html( $filePath ) )
+				);
+				exit;
+			}
 		}
 
 		/** Check if file has finished uploading all parts. */
 		if ( ! $chunks || $chunk == $chunks - 1 ) {
 
 			/** Recreate upload in $_FILES global and pass off to WordPress. */
-			rename( "{$filePath}.part", $_FILES['async-upload']['tmp_name'] );
+			rename( $filePath, $_FILES['async-upload']['tmp_name'] );
 			$_FILES['async-upload']['name'] = $fileName;
 			$_FILES['async-upload']['size'] = filesize( $_FILES['async-upload']['tmp_name'] );
 			//$wp_filetype = wp_check_filetype_and_ext( $_FILES['async-upload']['tmp_name'], $_FILES['async-upload']['tmp_name'] );
@@ -488,27 +590,42 @@ class BigFileUploads {
 
 				$id = media_handle_upload( 'async-upload', $post_id );
 				if ( is_wp_error( $id ) ) {
-					echo '<div class="error-div error">
-					<a class="dismiss" href="#" onclick="jQuery(this).parents(\'div.media-item\').slideUp(200, function(){jQuery(this).remove();});">' . __( 'Dismiss' ) . '</a>
-					<strong>' . sprintf( __( '&#8220;%s&#8221; has failed to upload.' ), esc_html( $_FILES['async-upload']['name'] ) ) . '</strong><br />' .
-					esc_html( $id->get_error_message() ) . '</div>';
+					printf(
+						'<div class="error-div error">%s <strong>%s</strong><br />%s</div>',
+						sprintf(
+							'<button type="button" class="dismiss button-link" onclick="jQuery(this).parents(\'div.media-item\').slideUp(200, function(){jQuery(this).remove();});">%s</button>',
+							__( 'Dismiss' )
+						),
+						sprintf(
+						/* translators: %s: Name of the file that failed to upload. */
+							__( '&#8220;%s&#8221; has failed to upload.' ),
+							esc_html( $_FILES['async-upload']['name'] )
+						),
+						esc_html( $id->get_error_message() )
+					);
 					exit;
 				}
 
-				if ( isset( $_REQUEST['short'] ) && $_REQUEST['short'] ) {
+				if ( $_REQUEST['short'] ) {
 					// Short form response - attachment ID only.
 					echo $id;
-				} elseif ( isset( $_REQUEST['type'] ) ) {
-					// Long form response - big chunk o html.
+				} else {
+					// Long form response - big chunk of HTML.
 					$type = $_REQUEST['type'];
 
 					/**
-					 * Filter the returned ID of an uploaded attachment.
+					 * Filters the returned ID of an uploaded attachment.
 					 *
-					 * The dynamic portion of the hook name, `$type`, refers to the attachment type,
-					 * such as 'image', 'audio', 'video', 'file', etc.
+					 * The dynamic portion of the hook name, `$type`, refers to the attachment type.
 					 *
-					 * @since 1.2.0
+					 * Possible hook names include:
+					 *
+					 *  - `async_upload_audio`
+					 *  - `async_upload_file`
+					 *  - `async_upload_image`
+					 *  - `async_upload_video`
+					 *
+					 * @since 2.5.0
 					 *
 					 * @param int $id Uploaded attachment ID.
 					 */
