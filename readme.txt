@@ -7,7 +7,7 @@ Author URI: https://infiniteuploads.com/?utm_source=wordpress.org&utm_medium=rea
 Contributors: uglyrobot, jdailey, andtrev
 Tags: increase file size limit, increase upload limit, max upload file size, post max size, upload limit, file upload, files uploader, ftp, video uploader, AJAX
 Requires at least: 5.3
-Tested up to: 5.8
+Tested up to: 5.9
 Stable tag: 2.0.1
 Requires PHP: 5.5
 License: GPLv2
