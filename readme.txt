@@ -8,7 +8,7 @@ Contributors: uglyrobot, jdailey, andtrev
 Tags: increase file size limit, increase upload limit, max upload file size, post max size, upload limit, file upload, files uploader, ftp, video uploader, AJAX
 Requires at least: 5.3
 Tested up to: 5.9
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 Requires PHP: 5.5
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -111,12 +111,13 @@ No. [Infinite Uploads](https://wordpress.org/plugins/infinite-uploads/) is an op
 
 == Changelog ==
 
-2.0.2 - 2022-1-31
+2.0.2 - 2022-2-03
 ----------------------------------------------------------------------
 - Fix: Conflicts with some theme builders like Themify.
 - Fix: Fail with error message instead of showing success with partially uploaded big files missing chunks.
 - Optimize default chunk size to limit requests.
 - Add a review on wordpress.org timed notice
+- Smoother Gutenberg editor support with a custom error message directing to use the media library uploader.
 
 2.0.1 - 2021-6-30
 ----------------------------------------------------------------------

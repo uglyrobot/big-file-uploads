@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Big File Uploads
  * Description: Enable large file uploads in the built-in WordPress media uploader via multipart uploads, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
- * Version:     2.0.2-beta-1
+ * Version:     2.0.2
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * Network:     true
@@ -109,6 +109,9 @@ class BigFileUploads {
 		//add_filter( 'ext2type', array( $this, 'filter_ext_types' ) );
 		add_action( 'wp_ajax_bfu_chunker', array( $this, 'ajax_chunk_receiver' ) );
 		add_action( 'post-upload-ui', array( $this, 'upload_output' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'gutenberg_notice' ) );
+		add_filter( 'block_editor_settings_all',  array( $this, 'gutenberg_size_filter' ) );
+
 
 		//single site
 		add_action( 'admin_menu', [ &$this, 'admin_menu' ] );
@@ -256,6 +259,35 @@ class BigFileUploads {
 		}
 
 		return $bytes;
+	}
+
+	/**
+	 * Add the js to Gutenberg to add our custom upload size notice.
+	 *
+	 * @return void
+	 */
+	function gutenberg_notice() {
+		wp_enqueue_script(
+			'bfu-block-upload-notice',
+			plugin_dir_url( __FILE__ ) . 'assets/js/block-notice.js',
+			[ 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor' ],
+			BIG_FILE_UPLOADS_VERSION
+		);
+
+		wp_set_script_translations( 'bfu-block-upload-notice', 'tuxedo-big-file-uploads' );
+	}
+
+	/**
+	 * Always pass the original size limit to Gutenberg so it can show our error (BFU only works inside media library via plupload).
+	 *
+	 * @param $editor_settings
+	 *
+	 * @return mixed
+	 */
+	function gutenberg_size_filter( $editor_settings ) {
+		$editor_settings['maxUploadFileSize'] = $this->max_upload_size;
+
+		return $editor_settings;
 	}
 
 	/**
