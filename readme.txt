@@ -1,7 +1,7 @@
 === Big File Uploads - Increase Maximum File Upload Size ===
 
 Plugin Name: Big File Uploads - Increase Maximum File Upload Size
-Version: 2.0.1
+Version: 2.0.2
 Author: Infinite Uploads
 Author URI: https://infiniteuploads.com/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=bfu_readme&utm_term=author_uri
 Contributors: uglyrobot, jdailey, andtrev
@@ -110,6 +110,13 @@ No. [Infinite Uploads](https://wordpress.org/plugins/infinite-uploads/) is an op
 4. Increase upload size for built-in file uploader.
 
 == Changelog ==
+
+2.0.2 - 2022-1-31
+----------------------------------------------------------------------
+- Fix: Conflicts with some theme builders like Themify.
+- Fix: Fail with error message instead of showing success with partially uploaded big files missing chunks.
+- Optimize default chunk size to limit requests.
+- Add a review on wordpress.org timed notice
 
 2.0.1 - 2021-6-30
 ----------------------------------------------------------------------

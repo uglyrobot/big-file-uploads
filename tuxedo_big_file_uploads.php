@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-define( 'BIG_FILE_UPLOADS_VERSION', '2.0.1' );
+define( 'BIG_FILE_UPLOADS_VERSION', '2.0.2' );
 
 /**
  * Big File Uploads manager class.
@@ -100,6 +100,7 @@ class BigFileUploads {
 		$this->max_upload_size = wp_max_upload_size();
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+		add_action( 'admin_notices', array( $this, 'init_review_notice' ) );
 		add_filter( 'plupload_init', array( $this, 'filter_plupload_settings' ) );
 		add_filter( 'upload_post_params', array( $this, 'filter_plupload_params' ) );
 		add_filter( 'plupload_default_settings', array( $this, 'filter_plupload_settings' ) );
@@ -199,6 +200,32 @@ class BigFileUploads {
 		$locale = apply_filters( 'plugin_locale', get_locale(), $domain );
 		load_textdomain( $domain, WP_LANG_DIR . '/' . $domain . '/' . $domain . '-' . $locale . '.mo' );
 		load_plugin_textdomain( $domain, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+	}
+
+	/**
+	 * Load Localization files.
+	 *
+	 * @since 1.0.0
+	 */
+	public function init_review_notice() {
+
+		require_once dirname( __FILE__ ) . '/classes/class-review-notice.php';
+
+		// Setup notice.
+		$notice = Big_File_Uploads_Review_Notice::get(
+			'tuxedo-big-file-uploads', // Plugin slug on wp.org (eg: hello-dolly).
+			__( 'Big File Uploads', 'tuxedo-big-file-uploads' ), // Plugin name (eg: Hello Dolly).
+			array(
+				'days' => 14,
+				'screens' => [ 'plugins', 'settings_page_big_file_uploads', 'upload' ],
+				'cap' => 'install_plugins',
+				'domain' => 'tuxedo-big-file-uploads',
+				'prefix' => 'bfu'
+			) // Notice options.
+		);
+
+		// Render notice.
+		$notice->render();
 	}
 
 	/**
