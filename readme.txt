@@ -108,7 +108,7 @@ No. [Infinite Uploads](https://wordpress.org/plugins/infinite-uploads/) is an op
 
 2.0.3 - 2022-7-03
 ----------------------------------------------------------------------
-- Security fix: Prevent OS command injection in rare hosting configurations.
+- Security fix: Prevent OS command injection in rare hosting configurations. props Marco Nappi.
 
 2.0.2 - 2022-2-03
 ----------------------------------------------------------------------
