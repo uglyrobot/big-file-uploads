@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Big File Uploads
  * Description: Enable large file uploads in the built-in WordPress media uploader via multipart uploads, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
- * Version:     2.0.2
+ * Version:     2.0.3
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * Network:     true
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-define( 'BIG_FILE_UPLOADS_VERSION', '2.0.2' );
+define( 'BIG_FILE_UPLOADS_VERSION', '2.0.3' );
 
 /**
  * Big File Uploads manager class.
@@ -417,38 +417,6 @@ class BigFileUploads {
 	}
 
 	/**
-	 * Return a file's mime type.
-	 *
-	 * @since 1.2.0
-	 *
-	 * @param string $filename File name.
-	 * @return false|string $mimetype Mime type.
-	 */
-	public function get_mime_content_type( $filename ) {
-
-		if ( function_exists( 'mime_content_type' ) ) {
-			return mime_content_type( $filename );
-		}
-
-		if ( function_exists( 'finfo_open' ) ) {
-			$finfo = finfo_open( FILEINFO_MIME );
-			$mimetype = finfo_file( $finfo, $filename );
-			finfo_close( $finfo );
-			return $mimetype;
-		} else {
-			ob_start();
-			system( 'file -i -b ' . $filename );
-			$output = ob_get_clean();
-			$output = explode( '; ', $output );
-			if ( is_array( $output ) ) {
-				$output = $output[0];
-			}
-			return $output;
-		}
-
-	}
-
-	/**
 	 * AJAX chunk receiver.
 	 * Ajax callback for plupload to handle chunked uploads.
 	 * Based on code by Davit Barbakadze
@@ -626,9 +594,8 @@ class BigFileUploads {
 			rename( $filePath, $_FILES['async-upload']['tmp_name'] );
 			$_FILES['async-upload']['name'] = $fileName;
 			$_FILES['async-upload']['size'] = filesize( $_FILES['async-upload']['tmp_name'] );
-			//$wp_filetype = wp_check_filetype_and_ext( $_FILES['async-upload']['tmp_name'], $_FILES['async-upload']['tmp_name'] );
-			$_FILES['async-upload']['type'] = $this->get_mime_content_type( $_FILES['async-upload']['tmp_name'] );
-			//$_FILES['async-upload']['type'] = $wp_filetype['type'];
+			$wp_filetype = wp_check_filetype_and_ext( $_FILES['async-upload']['tmp_name'], $_FILES['async-upload']['tmp_name'] );
+			$_FILES['async-upload']['type'] = $wp_filetype['type'];
 			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 
 			if ( ! isset( $_REQUEST['short'] ) || ! isset( $_REQUEST['type'] ) ) {

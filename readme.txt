@@ -1,14 +1,9 @@
 === Big File Uploads - Increase Maximum File Upload Size ===
-
-Plugin Name: Big File Uploads - Increase Maximum File Upload Size
-Version: 2.0.2
-Author: Infinite Uploads
-Author URI: https://infiniteuploads.com/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=bfu_readme&utm_term=author_uri
 Contributors: uglyrobot, jdailey, andtrev
 Tags: increase file size limit, increase upload limit, max upload file size, post max size, upload limit, file upload, files uploader, ftp, video uploader, AJAX
 Requires at least: 5.3
 Tested up to: 6.0
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 Requires PHP: 5.6
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -110,6 +105,10 @@ No. [Infinite Uploads](https://wordpress.org/plugins/infinite-uploads/) is an op
 4. Increase upload size for built-in file uploader.
 
 == Changelog ==
+
+2.0.3 - 2022-7-03
+----------------------------------------------------------------------
+- Security fix: Prevent OS command injection in rare hosting configurations.
 
 2.0.2 - 2022-2-03
 ----------------------------------------------------------------------
