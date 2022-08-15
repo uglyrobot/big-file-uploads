@@ -11,8 +11,6 @@
 				<div class="col-md-6 col-sm-12">
 					<h5><?php esc_html_e( 'Maximum Upload Size', 'tuxedo-big-file-uploads' ); ?></h5>
 					<p class="lead"><?php printf( esc_html__( 'Big File Uploads allows you to bypass your hosting file size %s limit by seamlessly uploading in multiple smaller chunks. Set the max filesize you want to allow users to upload in Megabytes (MB) or Gigabytes (GB) up to what your hosting provider can handle. Toggle "Customize by user role" to set the maximum file size for each user role with upload capabilities.', 'tuxedo-big-file-uploads' ), size_format( $this->max_upload_size ) ); ?></p>
-					<p class="lead"><?php printf( esc_html__( 'Estimated maximum supported size: %s', 'tuxedo-big-file-uploads' ), $this->temp_available_size() ? size_format( $this->temp_available_size() ) : __( 'Unknown (set a reasonable default limit and adjust down if uploads fail)', 'tuxedo-big-file-uploads' ) ); ?>
-						<span class="dashicons dashicons-info text-muted" data-toggle="tooltip" title="<?php esc_attr_e( 'This is an estimate based on the available space in your server temp directory.', 'tuxedo-big-file-uploads' ); ?>"></span></p>
 				</div>
 				<div class="col-md-6 col-sm-12 text-right p-4">
 					<div class="custom-control custom-switch mb-3">

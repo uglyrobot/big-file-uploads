@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Big File Uploads
  * Description: Enable large file uploads in the built-in WordPress media uploader via multipart uploads, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
- * Version:     2.0.3
+ * Version:     2.1
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * Network:     true
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-define( 'BIG_FILE_UPLOADS_VERSION', '2.0.3' );
+define( 'BIG_FILE_UPLOADS_VERSION', '2.1' );
 
 /**
  * Big File Uploads manager class.
@@ -418,6 +418,7 @@ class BigFileUploads {
 
 	/**
 	 * AJAX chunk receiver.
+	 *
 	 * Ajax callback for plupload to handle chunked uploads.
 	 * Based on code by Davit Barbakadze
 	 * https://gist.github.com/jayarjo/5846636
@@ -449,10 +450,38 @@ class BigFileUploads {
 
 		/** Get file name and path + name. */
 		$fileName = isset( $_REQUEST['name'] ) ? $_REQUEST['name'] : $_FILES['async-upload']['name'];
-		$filePath = dirname( $_FILES['async-upload']['tmp_name'] ) . '/bfu-' . md5( $fileName ) . '.part';
+
+		// Create temp directory if it doesn't exist
+		$bfu_temp_dir = apply_filters( 'bfu_temp_dir', WP_CONTENT_DIR . '/bfu-temp' );
+		if ( ! @is_dir( $bfu_temp_dir ) ) {
+			wp_mkdir_p( $bfu_temp_dir );
+		}
+
+		//scan temp dir for files older than 24 hours and delete them when starting a new upload
+		if ( $chunk === 0 ) {
+			$files = glob( $bfu_temp_dir . '/*.part' );
+			if ( is_array( $files ) ) {
+				foreach ( $files as $file ) {
+					if ( @filemtime( $file ) < time() - DAY_IN_SECONDS ) {
+						@unlink( $file );
+					}
+				}
+			}
+		}
+
+		$filePath = sprintf( '%s/%d-%s.part', $bfu_temp_dir, get_current_blog_id(), md5( $fileName ) );
+
+		//debugging
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$size = file_exists( $filePath ) ? size_format( filesize( $filePath ), 3 ) : '0 B';
+			error_log( "BFU: Processing \"$fileName\" part $current_part of $chunks as $filePath. $size processed so far." );
+		}
 
 		$tuxbfu_max_upload_size = $this->get_upload_limit();
 		if ( file_exists( $filePath ) && filesize( $filePath ) + filesize( $_FILES['async-upload']['tmp_name'] ) > $tuxbfu_max_upload_size ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( "BFU: File size limit exceeded." );
+			}
 
 			if ( ! $chunks || $chunk == $chunks - 1 ) {
 				@unlink( $filePath );
@@ -487,12 +516,6 @@ class BigFileUploads {
 			}
 
 			die();
-		}
-
-		//debugging
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$size = file_exists( $filePath ) ? size_format( filesize( $filePath ), 3 ) : '0 B';
-			error_log( "BFU: Processing \"$fileName\" part $current_part of $chunks as $filePath. $size processed so far." );
 		}
 
 		/** Open temp file. */
@@ -590,23 +613,28 @@ class BigFileUploads {
 		/** Check if file has finished uploading all parts. */
 		if ( ! $chunks || $chunk == $chunks - 1 ) {
 
+			//debugging
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$size = file_exists( $filePath ) ? size_format( filesize( $filePath ), 3 ) : '0 B';
+				error_log( "BFU: Completing \"$fileName\" upload with a $size final size." );
+			}
+
 			/** Recreate upload in $_FILES global and pass off to WordPress. */
-			rename( $filePath, $_FILES['async-upload']['tmp_name'] );
+			//rename( $filePath, $_FILES['async-upload']['tmp_name'] );
+			$_FILES['async-upload']['tmp_name'] = $filePath;
 			$_FILES['async-upload']['name'] = $fileName;
 			$_FILES['async-upload']['size'] = filesize( $_FILES['async-upload']['tmp_name'] );
-			$wp_filetype = wp_check_filetype_and_ext( $_FILES['async-upload']['tmp_name'], $_FILES['async-upload']['tmp_name'] );
+			$wp_filetype = wp_check_filetype_and_ext( $_FILES['async-upload']['tmp_name'], $_FILES['async-upload']['name'] );
 			$_FILES['async-upload']['type'] = $wp_filetype['type'];
 			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
 
-			if ( ! isset( $_REQUEST['short'] ) || ! isset( $_REQUEST['type'] ) ) {
-
+			if ( ! isset( $_REQUEST['short'] ) || ! isset( $_REQUEST['type'] ) ) { //ajax like media uploader in modal
 				send_nosniff_header();
 				nocache_headers();
-				wp_ajax_upload_attachment();
+				$this->wp_ajax_upload_attachment();
 				die( '0' );
 
-			} else {
-
+			} else { //non-ajax like add new media page
 				$post_id = 0;
 				if ( isset( $_REQUEST['post_id'] ) ) {
 					$post_id = absint( $_REQUEST['post_id'] );
@@ -614,7 +642,7 @@ class BigFileUploads {
 						$post_id = 0;
 				}
 
-				$id = media_handle_upload( 'async-upload', $post_id );
+				$id = media_handle_upload( 'async-upload', $post_id, [], [ 'action' => 'wp_handle_sideload', 'test_form' => false ] );
 				if ( is_wp_error( $id ) ) {
 					printf(
 						'<div class="error-div error">%s <strong>%s</strong><br />%s</div>',
@@ -663,6 +691,119 @@ class BigFileUploads {
 		}
 
 		die();
+	}
+
+	/**
+	 * Copied from wp-admin/includes/ajax-actions.php because we have to override the args for
+	 * the media_handle_upload function. As of WP 6.0.1
+	 */
+	function wp_ajax_upload_attachment() {
+		check_ajax_referer( 'media-form' );
+		/*
+		 * This function does not use wp_send_json_success() / wp_send_json_error()
+		 * as the html4 Plupload handler requires a text/html content-type for older IE.
+		 * See https://core.trac.wordpress.org/ticket/31037
+		 */
+
+		if ( ! current_user_can( 'upload_files' ) ) {
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'data'    => array(
+						'message'  => __( 'Sorry, you are not allowed to upload files.' ),
+						'filename' => esc_html( $_FILES['async-upload']['name'] ),
+					),
+				)
+			);
+
+			wp_die();
+		}
+
+		if ( isset( $_REQUEST['post_id'] ) ) {
+			$post_id = $_REQUEST['post_id'];
+
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				echo wp_json_encode(
+					array(
+						'success' => false,
+						'data'    => array(
+							'message'  => __( 'Sorry, you are not allowed to attach files to this post.' ),
+							'filename' => esc_html( $_FILES['async-upload']['name'] ),
+						),
+					)
+				);
+
+				wp_die();
+			}
+		} else {
+			$post_id = null;
+		}
+
+		$post_data = ! empty( $_REQUEST['post_data'] ) ? _wp_get_allowed_postdata( _wp_translate_postdata( false, (array) $_REQUEST['post_data'] ) ) : array();
+
+		if ( is_wp_error( $post_data ) ) {
+			wp_die( $post_data->get_error_message() );
+		}
+
+		// If the context is custom header or background, make sure the uploaded file is an image.
+		if ( isset( $post_data['context'] ) && in_array( $post_data['context'], array( 'custom-header', 'custom-background' ), true ) ) {
+			$wp_filetype = wp_check_filetype_and_ext( $_FILES['async-upload']['tmp_name'], $_FILES['async-upload']['name'] );
+
+			if ( ! wp_match_mime_types( 'image', $wp_filetype['type'] ) ) {
+				echo wp_json_encode(
+					array(
+						'success' => false,
+						'data'    => array(
+							'message'  => __( 'The uploaded file is not a valid image. Please try again.' ),
+							'filename' => esc_html( $_FILES['async-upload']['name'] ),
+						),
+					)
+				);
+
+				wp_die();
+			}
+		}
+
+		//this is the modded function from wp-admin/includes/ajax-actions.php
+		$attachment_id = media_handle_upload( 'async-upload', $post_id, $post_data, [ 'action' => 'wp_handle_sideload', 'test_form' => false ] );
+
+		if ( is_wp_error( $attachment_id ) ) {
+			echo wp_json_encode(
+				array(
+					'success' => false,
+					'data'    => array(
+						'message'  => $attachment_id->get_error_message(),
+						'filename' => esc_html( $_FILES['async-upload']['name'] ),
+					),
+				)
+			);
+
+			wp_die();
+		}
+
+		if ( isset( $post_data['context'] ) && isset( $post_data['theme'] ) ) {
+			if ( 'custom-background' === $post_data['context'] ) {
+				update_post_meta( $attachment_id, '_wp_attachment_is_custom_background', $post_data['theme'] );
+			}
+
+			if ( 'custom-header' === $post_data['context'] ) {
+				update_post_meta( $attachment_id, '_wp_attachment_is_custom_header', $post_data['theme'] );
+			}
+		}
+
+		$attachment = wp_prepare_attachment_for_js( $attachment_id );
+		if ( ! $attachment ) {
+			wp_die();
+		}
+
+		echo wp_json_encode(
+			array(
+				'success' => true,
+				'data'    => $attachment,
+			)
+		);
+
+		wp_die();
 	}
 
 	/**
