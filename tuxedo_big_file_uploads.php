@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Big File Uploads
  * Description: Enable large file uploads in the built-in WordPress media uploader via multipart uploads, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
- * Version:     2.1
+ * Version:     2.1.1
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * Network:     true
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-define( 'BIG_FILE_UPLOADS_VERSION', '2.1' );
+define( 'BIG_FILE_UPLOADS_VERSION', '2.1.1' );
 
 /**
  * Big File Uploads manager class.
@@ -451,14 +451,27 @@ class BigFileUploads {
 		/** Get file name and path + name. */
 		$fileName = isset( $_REQUEST['name'] ) ? $_REQUEST['name'] : $_FILES['async-upload']['name'];
 
-		// Create temp directory if it doesn't exist
-		$bfu_temp_dir = apply_filters( 'bfu_temp_dir', WP_CONTENT_DIR . '/bfu-temp' );
-		if ( ! @is_dir( $bfu_temp_dir ) ) {
-			wp_mkdir_p( $bfu_temp_dir );
-		}
 
-		//scan temp dir for files older than 24 hours and delete them when starting a new upload
+		$bfu_temp_dir = apply_filters( 'bfu_temp_dir', WP_CONTENT_DIR . '/bfu-temp' );
+
+		//only run on first chunk
 		if ( $chunk === 0 ) {
+			// Create temp directory if it doesn't exist
+			if ( ! @is_dir( $bfu_temp_dir ) ) {
+				wp_mkdir_p( $bfu_temp_dir );
+			}
+
+			// Protect temp directory from browsing.
+			$index_pathname = $bfu_temp_dir . '/index.php';
+			if ( ! file_exists( $index_pathname ) ) {
+				$file = fopen( $index_pathname, 'w' );
+				if ( false !== $file ) {
+					fwrite( $file, "<?php\n// Silence is golden.\n" );
+					fclose( $file );
+				}
+			}
+
+			//scan temp dir for files older than 24 hours and delete them.
 			$files = glob( $bfu_temp_dir . '/*.part' );
 			if ( is_array( $files ) ) {
 				foreach ( $files as $file ) {
@@ -469,7 +482,7 @@ class BigFileUploads {
 			}
 		}
 
-		$filePath = sprintf( '%s/%d-%s.part', $bfu_temp_dir, get_current_blog_id(), md5( $fileName ) );
+		$filePath = sprintf( '%s/%d-%s.part', $bfu_temp_dir, get_current_blog_id(), sha1( $fileName ) );
 
 		//debugging
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -620,17 +633,26 @@ class BigFileUploads {
 			}
 
 			/** Recreate upload in $_FILES global and pass off to WordPress. */
-			//rename( $filePath, $_FILES['async-upload']['tmp_name'] );
 			$_FILES['async-upload']['tmp_name'] = $filePath;
 			$_FILES['async-upload']['name'] = $fileName;
 			$_FILES['async-upload']['size'] = filesize( $_FILES['async-upload']['tmp_name'] );
 			$wp_filetype = wp_check_filetype_and_ext( $_FILES['async-upload']['tmp_name'], $_FILES['async-upload']['name'] );
 			$_FILES['async-upload']['type'] = $wp_filetype['type'];
-			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+
+			header( 'Content-Type: text/plain; charset=' . get_option( 'blog_charset' ) );
 
 			if ( ! isset( $_REQUEST['short'] ) || ! isset( $_REQUEST['type'] ) ) { //ajax like media uploader in modal
+
+				// Compatibility with Easy Digital Downloads plugin.
+				if ( function_exists( 'edd_change_downloads_upload_dir' ) ) {
+					global $pagenow;
+					$pagenow = 'async-upload.php';
+					edd_change_downloads_upload_dir();
+				}
+
 				send_nosniff_header();
 				nocache_headers();
+
 				$this->wp_ajax_upload_attachment();
 				die( '0' );
 
