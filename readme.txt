@@ -2,7 +2,7 @@
 Contributors: uglyrobot, jdailey, andtrev
 Tags: increase file size limit, increase upload limit, max upload file size, post max size, upload limit, file upload, files uploader, ftp, video uploader, AJAX
 Requires at least: 5.3
-Tested up to: 6.0
+Tested up to: 6.3
 Stable tag: 2.1.1
 Requires PHP: 5.6
 License: GPLv2
@@ -168,6 +168,8 @@ Learn how to manage large files on our blog:
 [Infinite Uploads Blog, Tips, Tricks, How-tos, and News](https://infiniteuploads.com/blog/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=bfu_readme&utm_term=blog)
 
 [Contribute to the plugin's development on Github!](https://github.com/uglyrobot/big-file-uploads)
+
+Want to use your WordPress site to train an AI chatbot to provide instant answers to your customers? Check out our sister project [DocsBot AI](https://docsbot.ai/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=bfu_readme)!
 
 Enjoy!
 
