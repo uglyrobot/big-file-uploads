@@ -257,12 +257,12 @@ class Big_File_Uploads_Review_Notice {
 				<a href="https://wordpress.org/support/plugin/<?php echo esc_html( $this->slug ); ?>/reviews/#new-post" target="_blank">
 					<?php esc_html_e( 'You deserve it!', $this->domain ); ?>
 				</a>
-				<a class="bfu-btn-later" href="<?php echo esc_url( add_query_arg( $this->key( 'action' ), 'later' ) ); ?>">
+				<a class="bfu-btn-later" href="<?php echo esc_url( wp_nonce_url( add_query_arg( $this->key( 'action' ), 'later' ), 'bfu_rate' ) ); ?>">
 					<?php esc_html_e( 'Maybe later', $this->domain ); ?>
 				</a>
 			</p>
 				<p>
-					<a class="bfu-btn-dismiss" href="<?php echo esc_url( add_query_arg( $this->key( 'action' ), 'dismiss' ) ); ?>">
+					<a class="bfu-btn-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( $this->key( 'action' ), 'dismiss' ), 'bfu_rate' ) ); ?>">
 						<?php esc_html_e( 'Leave me alone', $this->domain ); ?>
 					</a>
 				</p>
@@ -433,6 +433,11 @@ class Big_File_Uploads_Review_Notice {
 	protected function actions() {
 		// Only if required.
 		if ( ! $this->in_screen() || ! $this->is_capable() ) {
+			return;
+		}
+
+		//check nonce
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'bfu_rate' ) ) {
 			return;
 		}
 

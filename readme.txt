@@ -2,8 +2,8 @@
 Contributors: uglyrobot, jdailey, andtrev
 Tags: increase file size limit, increase upload limit, max upload file size, post max size, upload limit, file upload, files uploader, ftp, video uploader, AJAX
 Requires at least: 5.3
-Tested up to: 6.3
-Stable tag: 2.1.1
+Tested up to: 6.4
+Stable tag: 2.1.2
 Requires PHP: 5.6
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -105,6 +105,10 @@ No. [Infinite Uploads](https://wordpress.org/plugins/infinite-uploads/) is an op
 4. Increase upload size for built-in file uploader.
 
 == Changelog ==
+
+2.1.2 - 2023-10-25
+----------------------------------------------------------------------
+- Minor security improvement for dismissing the review notice (CSRF).
 
 2.1.1 - 2022-8-17
 ----------------------------------------------------------------------
