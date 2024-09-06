@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Big File Uploads
  * Description: Enable large file uploads in the built-in WordPress media uploader via multipart uploads, and set maximum upload file size to any value based on user role. Uploads can be as large as available disk space allows.
- * Version:     2.1.2
+ * Version:     2.1.3
  * Author:      Infinite Uploads
  * Author URI:  https://infiniteuploads.com/?utm_source=bfu_plugin&utm_medium=plugin&utm_campaign=bfu_plugin&utm_content=meta
  * Network:     true
@@ -24,7 +24,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright 2021 UglyRobot, LLC
+ * Copyright 2021-2024 UglyRobot, LLC
  *
  * @package BigFileUploads
  * @version 2.0
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-define( 'BIG_FILE_UPLOADS_VERSION', '2.1.2' );
+define( 'BIG_FILE_UPLOADS_VERSION', '2.1.3' );
 
 /**
  * Big File Uploads manager class.
@@ -175,7 +175,7 @@ class BigFileUploads {
 		} else {
 			$default_chunk = $max_chunk / KB_IN_BYTES;
 		}
-		//define( 'BIG_FILE_UPLOADS_CHUNK_SIZE_KB', 512 );//TODO remove
+
 		if ( ! defined( 'BIG_FILE_UPLOADS_CHUNK_SIZE_KB' ) ) {
 			define( 'BIG_FILE_UPLOADS_CHUNK_SIZE_KB', $default_chunk );
 		}
@@ -598,7 +598,7 @@ class BigFileUploads {
 					array(
 						'success' => false,
 						'data'    => array(
-							'message'  => sprintf( __( 'There was an error opening the temp file %s for writing. Available temp directory space may be exceeded or the temp file was cleaned up before the upload completed.', 'tuxedo-big-file-uploads' ), esc_html( $filePath ) ),
+							'message'  => __( 'There was an error opening the temp file for writing. Available temp directory space may be exceeded or the temp file was cleaned up before the upload completed.', 'tuxedo-big-file-uploads' ),
 							'filename' => esc_html( $fileName ),
 						),
 					)
@@ -617,7 +617,7 @@ class BigFileUploads {
 						__( '&#8220;%s&#8221; has failed to upload.' ),
 						esc_html( $fileName )
 					),
-					sprintf( __( 'There was an error opening the temp file %s for writing. Available temp directory space may be exceeded or the temp file was cleaned up before the upload completed.', 'tuxedo-big-file-uploads' ), esc_html( $filePath ) )
+					__( 'There was an error opening the temp file for writing. Available temp directory space may be exceeded or the temp file was cleaned up before the upload completed.', 'tuxedo-big-file-uploads' )
 				);
 				exit;
 			}
